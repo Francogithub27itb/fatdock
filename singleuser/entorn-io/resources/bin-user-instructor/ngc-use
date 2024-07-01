@@ -1,0 +1,16 @@
+#!/bin/bash
+basename "$0"
+f="$(basename -- $0)"
+
+if [ $# -eq 0 ]
+  then
+    echo "No arguments supplied"
+    echo "Please supply the course name: $f <course_name>"
+    exit 1
+fi
+
+CURRENT_COURSE_FILE=$HOME/.local/bin/before-custom.d/current_course.sh
+echo '#!/bin/bash' > $CURRENT_COURSE_FILE
+echo "export COURSE_NAME=$1" > $CURRENT_COURSE_FILE 
+echo "Operation successful."
+echo "Now, you need to restart your server before start working with the course $1."

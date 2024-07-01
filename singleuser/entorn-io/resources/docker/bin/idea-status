@@ -1,0 +1,24 @@
+#!/bin/bash
+
+##
+# Color  Variables
+##
+blue='\e[34m'
+clear='\e[0m'
+
+##
+# Color Functions
+##
+
+ColorBlue(){
+        echo -ne $blue$1$clear
+}
+
+status=$(docker ps -a -f name=idea_container | grep idea)
+echo ""
+if [ -z "$status" ]; then
+	echo "Container $(ColorBlue 'idea_container') does not exist"
+else
+	docker ps -a -f name=idea_container
+fi
+echo ""

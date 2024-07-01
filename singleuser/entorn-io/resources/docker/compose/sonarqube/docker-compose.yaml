@@ -1,0 +1,50 @@
+version: '3.5'
+  
+services:
+  sonarqube:
+    container_name: sonarqube_container
+    image: sonarqube:lts
+    command: "-Dsonar.web.context=/user/${NB_USER}/sonarqube"
+    depends_on:
+      - sonar_postgres
+    environment:
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: true
+      SONAR_JDBC_URL: jdbc:postgresql://sonar_postgres:5432/sonar
+      SONAR_JDBC_USERNAME: ${NB_USER}
+      SONAR_JDBC_PASSWORD: ${POSTGRES_PASSWORD:-pluralcamp}
+    volumes:
+      - ~/.config/sonar.properties:/opt/sonarqube/conf/sonar.properties
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    ports:
+      - "9090:9090"
+
+  sonar_postgres:
+    container_name: sonar_postgres_container
+    image: postgres:11.14
+    environment:
+      POSTGRES_USER: ${NB_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pluralcamp}
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_DB: sonar
+      PGDATA: /data/postgres
+    volumes:
+      - data:/data/postgres
+      - /var/run/postgresql:/var/run/postgresql
+    ports:
+      - "5431:5432"    
+
+networks:
+  default:
+    external: true
+    name: "${net:-entornet}"
+
+volumes:
+    data:
+    pgadmin_data:
+    pgadmin_config:
+    sonarqube_data:
+    sonarqube_extensions:
+    sonarqube_logs:      
+

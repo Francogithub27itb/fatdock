@@ -1,0 +1,31 @@
+#!/bin/bash
+  
+##
+# Color  Variables
+##
+blue='\e[34m'
+clear='\e[0m'
+
+##
+# Color Functions
+##
+
+ColorBlue(){
+        echo -ne $blue$1$clear
+}
+
+function check_status() {
+    status=$(docker ps -a -f name=$1 | grep $1)
+    if [ -z "$status" ]; then
+            echo "Container $(ColorBlue "$1") does not exist"
+    else
+            docker ps -a -f name=$1
+    fi
+    echo ""
+}
+
+echo ""
+check_status postgres_container
+check_status pgadmin_container
+
+

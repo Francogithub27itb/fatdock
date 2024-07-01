@@ -1,0 +1,30 @@
+#!/bin/bash
+basename "$0"
+f="$(basename -- $0)"
+
+if [ $# -eq 0 ]
+  then
+    echo "No arguments supplied"
+    printf "Please supply the instructor username: \n $f <instructor_username> \nto add it to the course $COURSE_NAME \n"
+    printf "\nIf you want to add the instructor to a different course: \n $f <instructor_username> <course_name>\n\n"
+    exit 1
+fi
+instructor_id=$1
+course_id=$COURSE_NAME
+if [[ ! -z $2 ]]; then
+	course_id=$2
+fi
+
+echo "Adding instructor with username $instructor_id to the course $course_id ..."
+
+printf "Instructor's first name: "
+first_name=`python -c "print(input())"`
+
+printf "Instructor's  last name: "
+last_name=`python -c "print(input())"`
+
+printf "Instructor's email: "
+email=`python -c "print(input())"`
+
+ngshare-course-management add_instructor $course_id $instructor_id -f $first_name -l $last_name -e $email
+exit 0

@@ -1,0 +1,32 @@
+#!/bin/bash
+
+echo "Setting up sonarqube db ..."
+
+sleep 3
+
+echo "DO 
+\$do$ 
+ BEGIN
+   IF EXISTS ( 
+      SELECT FROM pg_catalog.pg_roles 
+      WHERE  rolname = 'sonarqube') THEN 
+      RAISE NOTICE 'Role sonarqube already exists. Skipping.'; 
+   ELSE 
+      BEGIN   -- nested block 
+         CREATE ROLE sonarqube LOGIN PASSWORD 'pluralcamp'; 
+      EXCEPTION 
+         WHEN duplicate_object THEN 
+            RAISE NOTICE 'Role sonarqube was just created by a concurrent transaction. Skipping.'; 
+      END; 
+   END IF; 
+END 
+\$do$;" | psql -U $NB_USER
+
+psql -U $NB_USER -tc "SELECT 1 FROM pg_database WHERE datname = 'sonarqube';" | grep -q 1 || psql -U $NB_USER -c "CREATE DATABASE sonarqube;"
+
+psql -U $NB_USER -d sonarqube -c "CREATE SCHEMA IF NOT EXISTS sonar AUTHORIZATION sonarqube;"
+
+psql -U $NB_USER -c "ALTER USER sonarqube SET search_path to sonar"
+
+
+

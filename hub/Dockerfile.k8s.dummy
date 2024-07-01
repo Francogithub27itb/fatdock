@@ -1,0 +1,51 @@
+FROM jupyterhub/k8s-hub:1.1.3-n616.he76e1e57
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    LANG=C.UTF-8
+
+USER root
+
+ENV NB_USER=entorn \
+    HOME=/home/$NB_USER
+
+RUN \
+    usermod -l $NB_USER jovyan && \
+    mv /home/jovyan /home/$NB_USER && \
+    echo "${NB_USER}:pluralcamp" | chpasswd
+
+RUN EXTRA_APT_PACKAGES=; \
+    if [ `uname -m` != 'x86_64' ]; then EXTRA_APT_PACKAGES=libpq-dev; fi; \
+    apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+      dnsutils \
+      iputils-ping \
+      net-tools \
+      $EXTRA_APT_PACKAGES \
+      && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN pip install html-sanitizer && \
+pip install git+https://github.com/rcthomas/jupyterhub-announcement.git
+
+RUN pip install kubernetes
+
+WORKDIR /srv/jupyterhub
+
+# So we can actually write a db file here
+RUN chown ${NB_USER}:${NB_GID} /srv/jupyterhub
+
+# JupyterHub API port
+EXPOSE 8081 8888
+
+RUN mkdir -p /etc/jupyter/icons
+COPY icons/* /etc/jupyter/icons/
+
+USER ${NB_USER}
+CMD ["jupyterhub", "--config", "/usr/local/etc/jupyterhub/jupyterhub_config.py"]
+
+COPY page.html /usr/local/share/jupyterhub/templates/
+ARG config_dir=/usr/local/etc/jupyterhub/jupyterhub_config.d
+COPY 01_jh_config_custom_spawner_entorn.py $config_dir/
+#COPY 02_jh_config_custom_lti2.py $config_dir/
+#COPY 03_jh_config_custom_ngshare.py $config_dir/

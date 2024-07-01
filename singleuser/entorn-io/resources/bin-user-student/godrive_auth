@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if google-drive-ocamlfuse -browser google-chrome 2>/dev/null  ; then
+   echo ;
+   echo "Google Drive is now authorized" ;
+   echo "--- run 'godrive mount' now ---" ;
+   echo ;
+else
+   echo ;
+   echo "Error: You need to run 'godrive auth' in the Desktop environment" ;
+   echo ;
+fi
+

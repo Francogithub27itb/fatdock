@@ -1,0 +1,44 @@
+#!/bin/bash
+
+if [ "$1" == "start" ]; then
+    my-start
+    exit 0
+fi
+
+if [ "$1" == "stop" ]; then
+    my-stop
+    exit 0
+fi
+
+if [ "$1" == "status" ]; then
+    my-status
+    exit 0
+fi
+
+##
+# Color  Variables
+##
+green='\e[32m'
+clear='\e[0m'
+
+##
+# Color Functions
+##
+
+ColorGreen(){
+        echo -ne $green$1$clear
+}
+
+
+echo "Usage:"
+echo ""
+echo "To start the MYSQL docker container:"
+echo "$(ColorGreen 'my start')"
+echo ""
+echo "To stop the MYSQL docker container:"
+echo "$(ColorGreen 'my stop')"
+echo ""
+echo "To check the status of the MYSQL docker container:"
+echo "$(ColorGreen 'my status')"
+echo ""
+

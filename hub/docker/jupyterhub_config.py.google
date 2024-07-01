@@ -1,0 +1,207 @@
+# JupyterHub configuration
+#
+## If you update this file, do not forget to delete the `jupyterhub_data` volume before restarting the jupyterhub service:
+##
+##     docker volume rm jupyterhub_jupyterhub_data
+##
+## or, if you changed the COMPOSE_PROJECT_NAME to <name>:
+##
+##    docker volume rm <name>_jupyterhub_data
+##
+
+
+import os
+import sys
+import csv
+
+c = get_config()
+
+c.JupyterHub.tornado_settings.cookie_options = dict(expires_days=0.4125, max_age_days=0.4125)
+
+c.JupyterHub.redirect_to_server = False
+
+pwd = os.path.dirname(__file__)
+
+instructors_csv_file=os.path.join(pwd, 'instructors.csv')
+students_csv_file=os.path.join(pwd, 'students/students.csv')
+
+instructors = []
+with open(instructors_csv_file, 'r') as f:
+    rdr = csv.DictReader(filter(lambda row: len(row.strip()) > 0 and row.strip()[0] != '#', f))
+    for row in rdr:
+        instructors.append(row)
+
+students = []
+with open(students_csv_file, 'r') as f:
+    rdr = csv.DictReader(filter(lambda row: len(row.strip()) > 0 and row.strip()[0] != '#', f))
+    for row in rdr:
+        students.append(row)
+
+domain = os.environ['GSUITE_DOMAIN']
+
+# Same uid and gid is used for all instructors, and similarly same uid and gid are used for all students.
+# A linux user with the same uid as instructor_uid and with
+# the same primary gid as instructor_gid should exist on the host machine.
+# This linux account should be used by instructors to manage assignment files.
+# Even though all students will have same id inside their separate docker containers.
+# Students won't be able to access each other's files because each
+# of them will have different docker volumes mounted on their home directories inside container.
+
+instructor_uid = os.environ['INSTRUCTOR_UID']
+instructor_gid = os.environ['INSTRUCTOR_GID']
+student_uid = os.environ['STUDENT_UID']
+student_gid = os.environ['STUDENT_GID']
+
+# Host directories where volumes are mounted
+instructors_volumes_host_dir = os.environ['INSTRUCTORS_VOLUMES_HOST_DIR']
+students_volumes_host_dir = os.environ['STUDENTS_VOLUMES_HOST_DIR']
+exchange_host_dir = os.environ['EXCHANGE_HOST_DIR']
+instructors_shared_notebooks_host_dir=os.environ['INSTRUCTORS_SHARED_NOTEBOOKS_HOST_DIR']
+
+userlists_dir_host=os.environ['USERLISTS_HOST_DIR']
+course_name = os.environ['COURSE_NAME']
+notebook_dir_relative = os.environ['DOCKER_NOTEBOOK_DIR']
+
+## host port for jupyterhub (inside container is always 8000)
+host_port=os.environ['HOST_PORT']
+
+c.JupyterHub.template_vars = {'announcement': f'Pluralcamp Labs: {course_name}'}
+
+## Authenticator
+
+from oauthenticator.google import GoogleOAuthenticator
+            
+c.JupyterHub.authenticator_class = 'oauthenticator.GoogleOAuthenticator'
+
+c.GoogleOAuthenticator.hosted_domain = [f'{domain}']
+
+c.GoogleOAuthenticator.login_service = f'@{domain}'
+
+c.Authenticator.allowed_users = whitelist = set()
+c.Authenticator.admin_users = admin = set()
+
+# Whitlelist students and instructors.
+# Makes all instructors as admins.
+for instructor in instructors:
+    admin.add(instructor['id'])
+    whitelist.add(instructor['id'])
+
+for student in students:
+    whitelist.add(student['id'])
+
+c.GoogleOAuthenticator.client_id = os.environ['GOOGLE_CLIENT_ID']
+c.GoogleOAuthenticator.client_secret = os.environ['GOOGLE_CLIENT_SECRET']
+c.GoogleOAuthenticator.oauth_callback_url = os.environ['OAUTH_CALLBACK_URL']
+
+## Generic
+c.JupyterHub.admin_access = True
+# c.Spawner.default_url = '/lab'
+c.Spawner.http_timeout = 40
+display=os.environ['DISPLAY']
+
+from dockerspawner import DockerSpawner
+
+class MyDockerSpawner(DockerSpawner):
+    def get_env(self):
+        import os 
+        env = super().get_env()
+        env['NB_USER'] = env['NB_GROUP'] = self.user.name
+        env['NOTEBOOK_DIR_RELATIVE'] = notebook_dir_relative
+        env['JUPYTERHUB_USER'] = self.user.name
+        env['CHOWN_HOME_OPTS'] = '-R'
+        env['CHOWN_HOME'] = 'yes'
+        env['HOME'] = os.path.join('/home' , self.user.name)
+        env['COURSE_NAME'] = course_name
+        env['DISPLAY'] = display
+        #env['JUPYTERHUB_CLIENT_ID'] = f'jupyterhub-user-{self.user.name}'
+        # Course home directory on container as setup by `singleuser/bin/start-custom.sh`
+        env['COURSE_HOME_ON_CONTAINER'] = os.path.join(env['HOME'], notebook_dir_relative, 'courses', course_name)
+        env['DOCKER_NOTEBOOK_DIR'] = os.path.join(env['HOME'], notebook_dir_relative)
+        #env['JUPYTERHUB_SERVICE_PREFIX'] = os.path.join('/' , course_name, 'user', self.user.name) 
+        #env['JUPYTERHUB_OAUTH_CALLBACK_URL'] = os.path.join(env['JUPYTERHUB_SERVICE_PREFIX'], 'oauth_callback')
+
+        if self.is_instructor():
+            env['IS_INSTRUCTOR'] = 'true'
+            env['NB_UID'] = instructor_uid
+            env['NB_GID'] = instructor_gid
+            env['GRANT_SUDO'] = 'yes'
+            return env
+
+        # Hub user is not instructor.
+        env['IS_INSTRUCTOR'] = 'false'
+        env['NB_UID'] = student_uid
+        env['NB_GID'] = student_gid
+        return env
+    
+    # removes domain when username is email
+    def trim_username(self):
+        if '@' in self.user.name: 
+            return self.user.name.split('@')[0]
+        else:
+            return self.user.name
+  
+    def is_instructor(self):
+        for instructor in instructors:
+            if self.user.name in instructor['id']:
+                return True
+        return False
+
+    def start(self):
+        #self.user.name = self.trim_username()
+        if self.is_instructor():
+            self.volumes[f'{instructors_volumes_host_dir}/{self.user.name}'] = {
+                'bind': notebook_dir,
+                'mode': 'rw',  # or ro for read-only
+            }
+            self.volumes[f'{instructors_shared_notebooks_host_dir}/{self.user.name}'] = {
+                'bind': os.path.join(notebook_dir, 'my_notebooks'),
+                'mode': 'rw',  # or ro for read-only
+            }
+        else:
+            self.volumes[f'{students_volumes_host_dir}/{self.user.name}'] = {
+                'bind': notebook_dir,
+                'mode': 'rw',  # or ro for read-only
+            }
+        return super().start()
+
+# spawn with Docker
+c.JupyterHub.spawner_class = MyDockerSpawner
+c.DockerSpawner.image = os.environ['DOCKER_JUPYTER_CONTAINER']
+c.DockerSpawner.network_name = os.environ['DOCKER_NETWORK_NAME']
+
+#c.Spawner.args = ['--publish 4040:4040']
+
+# See https://github.com/jupyterhub/dockerspawner/blob/master/examples/oauth/jupyterhub_config.py
+c.JupyterHub.hub_connect_ip = os.environ['HUB_IP']
+c.JupyterHub.hub_ip = '0.0.0.0'
+
+# For docker, bind_url needs to be the name of the jupyterhub service as it is stated in docker-compose.yml
+## this configuration option stablishes also the base_url
+#c.JupyterHub.bind_url = f'http://jupyterhub_{course_name}:8000/{course_name}'
+c.JupyterHub.bind_url = f'http://jupyterhub_{course_name}:8000'
+
+c.DockerSpawner.name_template = "{prefix}-{username}-" + f"{course_name}"
+
+home_dir = "/home/{username}"
+
+notebook_dir = os.path.join(home_dir, notebook_dir_relative)  or '/home/jovyan/work'
+
+c.DockerSpawner.notebook_dir = notebook_dir 
+
+c.DockerSpawner.volumes = { exchange_host_dir: '/srv/nbgrader/exchange',  os.environ['COURSE_HOME_HOST_DIR'] : '/srv/nbgrader/courses/%s' % course_name, os.path.join(userlists_dir_host,'students'): '/tmp/csv', '/tmp/.X11-unix': '/tmp/.X11-unix' }
+
+
+# Other stuff
+c.Spawner.cpu_limit = 2
+c.Spawner.mem_limit = '2G'
+
+## Services
+
+c.JupyterHub.services = [
+    {
+        'name': 'idle-culler',
+        'admin': True,
+        'command': [sys.executable, '-m', 'jupyterhub_idle_culler', '--timeout=900'],
+    },
+]
+

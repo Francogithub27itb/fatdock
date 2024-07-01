@@ -1,0 +1,12 @@
+#!/bin/sh
+  
+export net=entornet
+export pgport=$1
+export DOCKER_HOST=tcp://127.0.0.1:2375
+docker network create $net > /dev/null  2>&1
+pg-stop > /dev/null 2>&1
+cd /home/$NB_USER/.docker/postgres
+/usr/local/bin/docker-compose up -d --remove-orphans
+dbdata_mount > /dev/null 2>&1
+exit 0
+

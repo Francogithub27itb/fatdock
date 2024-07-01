@@ -1,0 +1,62 @@
+FROM jupyterhub/k8s-hub:4.0.0-0.dev.git.6635.hecbe9b5b
+#FROM jupyterhub/jupyterhub:5
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    LANG=C.UTF-8
+
+ARG NB_USER=orboan
+ARG NB_GROUP=orboan
+ARG NB_UID=1000
+ARG NB_GID=1000
+
+USER root
+
+RUN EXTRA_APT_PACKAGES=; \
+    if [ `uname -m` != 'x86_64' ]; then EXTRA_APT_PACKAGES=libpq-dev; fi; \
+    apt-get update && \
+    apt-get upgrade -y && \
+    python3 -m pip install --upgrade pip && \
+    apt-get install -y --no-install-recommends git sudo \
+      dnsutils \
+      iputils-ping \
+      net-tools \
+      $EXTRA_APT_PACKAGES \
+      && \
+    rm -rf /var/lib/apt/lists/*
+
+# Add a temporary user for testing (since Docker's default user may not have UID 1000)
+#RUN useradd -m -u 1000 tempuser
+
+# Find the existing user with UID 1000 and rename them to 'NB_USER'
+# Add 'NB_USER' to sudoers file with no password requirement
+RUN user=$(getent passwd $NB_UID | cut -d: -f1) && \
+    usermod -l $NB_USER -d /home/$NB_USER -m $user && \
+    groupmod -n $NB_USER $user 
+RUN echo "$NB_USER ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
+    echo "${NB_USER}:pluralcamp" | chpasswd
+
+RUN pip install html-sanitizer && \
+pip install git+https://github.com/rcthomas/jupyterhub-announcement.git
+
+RUN pip install --upgrade pip && \
+    pip install kubernetes kubernetes_asyncio oauthenticator
+#pip install jupyterhub-kubespawner kubernetes kubernetes_asyncio oauthenticator
+
+WORKDIR /srv/jupyterhub
+
+# So we can actually write a db file here
+RUN chown ${NB_USER}:${NB_GID} /srv/jupyterhub
+
+# JupyterHub API port
+EXPOSE 8081 8888
+
+RUN mkdir -p /etc/jupyter/icons
+COPY icons/* /etc/jupyter/icons/
+
+CMD ["jupyterhub", "--config", "/usr/local/etc/jupyterhub/jupyterhub_config.py"]
+
+COPY page.html /usr/local/share/jupyterhub/templates/
+ARG config_dir=/usr/local/etc/jupyterhub/jupyterhub_config.d
+COPY 01_jh_config_custom_spawner_entorn.py $config_dir/
+COPY 02_jh_config_custom_github.py $config_dir/
+#COPY 03_jh_config_custom_ngshare.py $config_dir/

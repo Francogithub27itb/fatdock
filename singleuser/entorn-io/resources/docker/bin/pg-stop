@@ -1,0 +1,4 @@
+#!/bin/sh
+export net=entornet  
+cd /home/$NB_USER/.docker/postgres
+DOCKER_HOST=tcp://127.0.0.1:2375 /usr/local/bin/docker-compose down

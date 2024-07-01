@@ -1,0 +1,219 @@
+#!/bin/bash
+
+##
+# BASH menu script that set env var IDEA_IMG:
+#   - jetbrains/projector-clion
+#   - jetbrains/projector-datagrip
+#   - jetbrains/projector-goland
+#   - jetbrains/projector-idea-c
+#   - jetbrains/projector-idea-u
+#   - jetbrains/projector-phpstorm
+#   - jetbrains/projector-pycharm-c
+#   - jetbrains/projector-pycharm-p
+#   - jetbrains/projector-rider
+#   - jetbrains/projector-rubymine
+#   - jetbrains/projector-webstorm
+#   
+##
+
+file="$HOME/.docker/idea/.env"
+
+
+if [ "$1" == "cat" ] || [ "$1" == "-cat" ]; then
+    cat=true
+fi
+
+### Intro message
+if [ "$cat" == "true" ]; then
+        intro_msg="---- Script per a establir o canviar la imatge docker de Jetbrains IDEA ----"
+else
+        intro_msg="---- Script to set or change the docker image for Jetbrains IDEA ----"
+fi
+
+echo $intro_msg
+
+##
+# Color  Variables
+##
+green='\e[32m'
+blue='\e[34m'
+red='\e[31m'
+clear='\e[0m'
+
+##
+# Color Functions
+##
+
+ColorGreen(){
+        echo -ne $green$1$clear
+}
+ColorBlue(){
+        echo -ne $blue$1$clear
+}
+
+ColorRed(){
+        echo -ne $red$1$clear
+}
+
+### Show the current IDEA docker image
+echo ""
+if [ "$cat" == true ]; then
+        echo "La imatge docker IDEA configurada ara es:"
+else
+        echo "The docker image for Idea is currently set to:"
+fi
+image=$(cat $file | grep IDEA_IMG | cut -d "=" -f 2)
+echo $(ColorBlue "$image")
+IDEA_TAG=$(echo $image | cut -d"/" -f2 | cut -d":" -f2)
+
+### This Function prints all available IDEA docker images
+function idea_images_list() {
+  header_message_eng="List of available docker images for Jetbrains IDEA:"
+  header_message_cat="Llista d'imatges disponibles de Jetbrains IDEA:"
+  if [ "$cat" == "true" ]; then
+    msg=$header_message_cat
+  else
+    msg=$header_message_eng
+  fi
+  echo -ne "$msg
+$(ColorBlue '1)') clion
+$(ColorBlue '2)') datagrip
+$(ColorBlue '3)') golang
+$(ColorBlue '4)') intellij community
+$(ColorBlue '5)') intellij ultimate
+$(ColorBlue '6)') phpstorm
+$(ColorBlue '7)') pycharm community
+$(ColorBlue '8)') pycharm professional
+$(ColorBlue '9)') rider
+$(ColorBlue 'a)') rubymine
+$(ColorBlue 'b)') webstorm
+  "
+}
+
+
+if [ "$cat" == "true" ]; then
+  if [ "$(docker ps -a | grep $idea_container_name)" ]; then
+        echo ""
+        echo "$(ColorRed 'Atencio: la imatge docker d Idea no es pot canviar ara')"
+        echo "(Llegiu les instruccions a continuacio)"
+        echo ""
+        echo "$(ColorRed "Idea docker s'esta executant...") Cal aturar $(ColorBlue "$idea_container_name") abans de canviar la imatge d'Idea:"
+        echo "$(ColorGreen 'idea stop')"
+        echo ""
+        echo "Un cop canviada la imatge d'Idea, arrenca de nou el contenidor d'Idea amb:"
+        echo "$(ColorGreen 'idea start')"
+        echo "--"
+        echo ""
+        idea_images_list
+        echo ""
+        exit 0
+  fi
+fi
+
+if [ "$(docker ps -a | grep $idea_container_name)" ]; then
+        echo ""
+        echo "$(ColorRed 'Attention: the Idea docker image cannot be changed now')"
+        echo "(Read instructions below)"
+        echo ""  
+        echo "$(ColorRed 'Idea docker is running...') It is mandatory to stop $(ColorBlue "$idea_container_name") before changing Idea image:"
+        echo "$(ColorGreen 'idea stop')"
+        echo ""
+        echo "After changing the Idea image, start again the Idea container using:"
+        echo "$(ColorGreen 'idea start')"
+        echo "--"
+        echo ""
+        idea_images_list
+        echo ""
+        exit 0
+fi
+
+#######################################
+
+VAR=$IDEA_TAG
+default_tag="2021.3-projector-v1.6.0"
+echo ""
+if [[ $VAR == "" ]]; then
+   echo "IDEA_TAG is set to default:"
+   echo "$(ColorBlue "$default_tag")"
+   tag="${default_tag}"
+else
+   echo "IDEA_TAG is set to:"
+   echo "$(ColorBlue "$VAR")"
+   tag="${VAR}"
+fi
+
+### Instructions on how to change the IDEA_TAG
+echo ""
+echo "To change the default tag run:"
+echo "$(ColorGreen  'idea set-tag <your-tag-here>')"
+echo "For example:"
+echo "$(ColorGreen 'idea set-tag 2022.1-projector-v1.8.0')"
+echo ""
+echo "($(ColorGreen 'idea set-tag') can be shortened as $(ColorGreen 'idea sett'))"
+echo ""
+
+
+function set-image() {
+    echo ""
+        iname=$1
+        echo "Idea docker image is set to $iname:"
+        sed -i '/IDEA_INAME/d' $file
+        sed -i '/IDEA_IMG/d' $file
+        iname_var="IDEA_INAME=$iname"
+        image_var="IDEA_IMG=jetbrains/$iname:${tag}"
+        echo $iname_var >> $file
+        echo $image_var >> $file
+}
+
+menu(){
+echo -ne "
+Select docker image for Jetbrains IDEA:
+$(ColorBlue '1)') clion
+$(ColorBlue '2)') datagrip
+$(ColorBlue '3)') golang
+$(ColorBlue '4)') intellij community
+$(ColorBlue '5)') intellij ultimate
+$(ColorBlue '6)') phpstorm
+$(ColorBlue '7)') pycharm community
+$(ColorBlue '8)') pycharm professional
+$(ColorBlue '9)') rider
+$(ColorBlue 'a)') rubymine
+$(ColorBlue 'b)') webstorm
+$(ColorBlue '0)') Exit
+$(ColorRed 'Choose an option:') "
+        read a
+        case $a in
+                1) set-image projector-clion ; ;;
+                2) set-image projector-datagrip ; ;;
+                3) set-image projector-golang ; ;;
+                4) set-image projector-idea-c ; ;;
+                5) set-image projector-idea-u ; ;;
+                6) set-image projector-phpstorm ; ;;
+                7) set-image projector-pycharm-c ; ;;
+                8) set-image projector-pycharm-p ; ;;
+                9) set-image projector-rider ; ;;
+                a) set-image projector-rubymine ; ;;
+                b) set-image projector-webstorm ; ;;
+                0) exit 0 ;;
+                *) echo -e $red"Wrong option."$clear; menu;;
+        esac
+}
+
+
+# Call the menu function
+if [[ "$1" == "python" ]]; then
+    current_image=$(idea geti)
+    if [[ "$current_image" == *pycharm* ]]; then
+        echo "Your current Idea image is set to $current_image" 
+    else
+        set-image projector-pycharm-c
+    fi
+else
+    menu
+fi
+image=$(cat $file | grep IDEA_IMG | cut -d "=" -f 2)
+echo $(ColorBlue "$image")
+echo ""
+
+
+

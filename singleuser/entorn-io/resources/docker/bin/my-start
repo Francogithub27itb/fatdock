@@ -1,0 +1,11 @@
+#!/bin/sh
+
+export net=entornet
+export myport=$1
+export DOCKER_HOST=tcp://127.0.0.1:2375
+docker network create $net > /dev/null  2>&1 
+my-stop > /dev/null 2>&1
+cd /home/$NB_USER/.docker/mysql
+/usr/local/bin/docker-compose up -d --remove-orphans
+dbdata_mount > /dev/null 2>&1
+exit 0

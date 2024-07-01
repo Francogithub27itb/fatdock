@@ -1,0 +1,25 @@
+version: '3.9'
+  
+services:
+  mysql:
+    build: .
+    container_name: mysql_container
+    environment:
+      MYSQL_ROOT_PASSWORD: "admin"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      NB_USER: "${NB_USER}"
+    volumes:
+       - data:/var/lib/mysql
+       - /var/run/mysqld:/var/run/mysqld
+    ports:
+      - "${myport:-3306}:3306"
+
+networks:
+  default:
+    external: true
+    name: "${net:-entornet}"
+
+volumes:
+    data:
+
+

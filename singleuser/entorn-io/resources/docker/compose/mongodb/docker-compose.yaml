@@ -1,0 +1,24 @@
+version: '3.7'
+services:
+  mongodb:
+    container_name: mongodb_container
+    image: mongo:${MONGO_VER:-5}
+    environment: 
+      USER: "${USER}"
+      MONGO_DATA_DIR: "/data/db"
+      MONGO_LOG_DIR: "/dev/null"
+      MONGO_INITDB_DATABASE: "test"
+    ports:
+      - 27017:27017
+    volumes:
+      - data:/data/db
+      - "/opt/dbdata-${USER}/sampledb/mongodb:/sampledb/mongodb"
+      - ~/.docker/mongodb/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+volumes:
+  data:
+
+networks:
+  default:
+    external: true
+    name: "${net:-entornet}"
+

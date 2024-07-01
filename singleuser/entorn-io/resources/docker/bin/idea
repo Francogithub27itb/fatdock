@@ -1,0 +1,78 @@
+#!/bin/bash
+
+if [ "$1" == "start" ]; then
+    idea-start
+    exit 0
+fi
+
+if [ "$1" == "stop" ]; then
+    idea-stop
+    exit 0
+fi
+
+if [ "$1" == "status" ]; then
+    idea-status
+    exit 0
+fi
+
+if [ "$1" == "set-image" ] || [ "$1" = "seti" ]; then
+    idea-set-image "$2"
+    exit 0
+fi
+
+if [ "$1" == "get-image" ] || [ "$1" = "geti" ]; then
+    idea-get-image "$2"
+    exit 0
+fi
+
+if [ "$1" == "set-tag" ] || [ "$1" = "sett" ]; then
+    idea-set-tag "$2"
+    exit 0
+fi
+
+if [ "$1" == "build" ]; then
+    idea-build "$2" "$3"
+    exit 0
+fi
+
+##
+# Color  Variables
+##
+green='\e[32m'
+clear='\e[0m'
+
+##
+# Color Functions
+##
+
+ColorGreen(){
+        echo -ne $green$1$clear
+}
+
+
+echo "Usage:"
+echo ""
+echo "To start the IDEA docker container:"
+echo "$(ColorGreen 'idea start')"
+echo ""
+echo "To stop the IDEA docker container:"
+echo "$(ColorGreen 'idea stop')"
+echo ""
+echo "To check the status of the IDEA docker container:"
+echo "$(ColorGreen 'idea status')"
+echo ""
+echo "To set or change the IDEA docker image:"
+echo "$(ColorGreen 'idea set-image') or $(ColorGreen 'idea seti')" 
+echo ""
+echo "To set or change the tag for the current IDEA docker image:"
+echo "$(ColorGreen 'idea set-tag <your-tag-here>') or $(ColorGreen 'idea sett <your-tag-here>')"
+echo ""
+echo "To show or print the current IDEA docker image:"
+echo "$(ColorGreen 'idea get-image') or $(ColorGreen 'idea geti')"
+echo ""
+echo "To build the IDEA docker image:"
+echo "$(ColorGreen 'idea build')"
+echo ""
+                      
+
+

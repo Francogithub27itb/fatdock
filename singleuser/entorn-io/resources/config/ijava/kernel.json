@@ -1,0 +1,15 @@
+{
+    "argv": [
+        "/opt/apps/sdkman/candidates/java/current/bin/java",
+        "-jar","-ea",
+        "/opt/conda/share/jupyter/kernels/java/ijava-1.3.0.jar",
+        "{connection_file}"
+    ],
+    "display_name": "Java",
+    "env": {
+        "IJAVA_STARTUP_SCRIPTS_PATH": "/opt/jshell/printing.jshell"
+    },
+    "interrupt_mode": "message",
+    "language": "java"
+}
+

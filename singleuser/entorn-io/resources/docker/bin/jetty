@@ -1,0 +1,44 @@
+#!/bin/bash
+
+if [ "$1" == "start" ]; then
+    jetty-start
+    exit 0
+fi
+
+if [ "$1" == "stop" ]; then
+    jetty-stop
+    exit 0
+fi
+
+if [ "$1" == "status" ]; then
+    jetty-status
+    exit 0
+fi
+
+##
+# Color  Variables
+##
+green='\e[32m'
+clear='\e[0m'
+
+##
+# Color Functions
+##
+
+ColorGreen(){
+        echo -ne $green$1$clear
+}
+
+
+echo "Usage:"
+echo ""
+echo "To start the JETTY docker container:"
+echo "$(ColorGreen 'jetty start')"
+echo ""
+echo "To stop the JETTY docker container:"
+echo "$(ColorGreen 'jetty stop')"
+echo ""
+echo "To check the status of the JETTY docker container:"
+echo "$(ColorGreen 'jetty status')"
+echo ""
+

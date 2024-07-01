@@ -1,0 +1,8 @@
+#!/bin/bash
+message="auto commit"
+git add .
+git commit -m "$message"
+git-sync
+git submodule foreach "git commit -a -m \"$message\" || :"
+git submodule foreach "git-sync || :"
+exit 0

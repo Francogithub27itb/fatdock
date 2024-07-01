@@ -1,0 +1,17 @@
+version: "3.9"
+  
+services:
+  jetty:
+    image: "jetty:10-jdk17-alpine-amazoncorretto"
+    container_name: jetty_container
+    environment:
+      JAVA_OPTIONS: "-Xmx1024m -Xms256m"
+    volumes:
+      - ~/webapps:/var/lib/jetty/webapps
+    ports:
+      - "${jettyport:-8009}:8080"
+
+networks:
+  default:
+    external: true
+    name: "${net:-entornet}"

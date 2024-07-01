@@ -1,0 +1,9 @@
+#!/bin/bash
+
+a='eval "$(command conda'
+str=`grep "$a" ~/.bashrc`
+if [[ $str =~ ^#.* ]]; then
+        sed -i 's/#eval "$(command conda/eval "$(command conda/g' ~/.bashrc
+        echo "Conda activat en nous terminals."
+        echo "Conda is activated in new terminals."
+fi

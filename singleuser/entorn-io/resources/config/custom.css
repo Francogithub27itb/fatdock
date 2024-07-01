@@ -1,0 +1,251 @@
+@import url('https://fonts.googleapis.com/css?family=Audiowide&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Bad+Script&display=swap');
+/*
+#ipython_notebook::before{
+ content: '{} Pluralcamp Labs';
+ font-family: 'Audiowide';
+ color: #f7efdc;
+ padding-top: 6px;
+ padding-left: 20px;
+}
+*/
+#ipython_notebook img{                                                                                        
+    display:block; 
+    background: url("https://lms.pluralcamp.com/pluginfile.php/1/theme_moove/logo/1614018306/logo-pc-horiz.png") no-repeat;
+    background-size: contain;
+    width: 100px;
+    height: 30px;
+    padding-left: 100px;
+    padding-right: 50px;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+#ipython-main-app {
+    /*box-shadow: 0px 0px 12px 1px rgb(87 87 87 / 40%);*/
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-top: 10px;
+    width: auto;
+    height: auto;
+    background: #faf5ea !important;
+}
+@media only screen and (min-width: 1080px) {
+  #ipython-main-app {
+    min-width: 1080px;
+  }
+}
+#site {
+    background: #f7efdc;
+    color: #332109;
+}
+body > #header {
+    /*background: #332109;
+    color: #f7efdc;*/
+}
+body > #header #header-container {
+    width: auto;
+    background: #332109;
+}
+body > #header .header-bar {
+    background: #E7CF97;
+}
+#notebook_name {
+    font-weight: 500;
+    background-color: #332109;
+    color: #f7efdc;
+    padding-top: 2px;
+    border-radius: 5px;
+}
+span#kernel_logo_widget {
+    padding-top: 2px;
+    background-color: #F7EFDC !important;
+}
+#modal_indicator {
+    color: #FFCA62 !important;
+}
+#new-menu .dropdown-header {
+    min-width: 300px;
+    background-color: #f7efdc;
+    font-size: 12px;
+}
+.dropdown-menu:nth-child(2) > li {
+    display: inline-table;
+    min-width: 150px;
+}
+.dropdown-menu {
+    /* min-width: 300px; */
+}
+.btn-default {
+    margin-top: 1px;
+}
+.navbar-default {
+    background: none;
+    border: none;
+}
+.navbar-default .navbar-nav > li > a:link {
+    color: #332109;
+    background-color: #e7cf97;
+    transition: all 0.25s
+}
+.navbar-default .navbar-nav > li > a:visited {
+    color: #332109;
+    background-color: #e7cf97;
+}
+.navbar-default .navbar-nav > li > a:hover {
+    color: #FAF5EA;
+    background-color: #57380f;
+}
+.onoffswitch-inner:before {
+    color: #332109 !important;
+    background-color: #e7cf97 !important;
+}
+.onoffswitch-inner:after {
+    color: #332109 !important;
+    background-color: #f7efdc !important;
+}
+#kernel_indicator {
+    font-weight: bold;
+    /*color: #FFCA62;*/
+}
+/*.notebook_app, #ipython-main-app {
+    background: #faf5ea !important;
+}*/
+
+.notebook_app {
+    background: #faf5ea !important;
+}
+
+span.autosave_status, span.checkpoint_status {
+    color: white;
+}
+@media (min-width: 768px) and (max-width: 991px) {
+   span.autosave_status, span.checkpoint_status {
+      color: white;
+   }
+}
+
+div.input_area {
+    border: none;
+    border-radius: 0;
+    background: #f7fffc;
+    line-height: 1.5em;
+    margin: 0.5em 0;
+    padding: 0;
+}
+#notebook-container{
+    box-shadow: none !important;
+    /*background-color: #faf5ef;*/
+}
+div.cell {
+    transition: all 0.25s;
+    border: none;
+    position: relative;
+    top: 0;
+    margin-bottom: 12px;
+}
+div.cell.selected, div.cell.selected.jupyter-soft-selected {
+    border: none;
+    background: transparent;
+    box-shadow: 0 6px 18px #664400;
+    z-index: 10;
+    top: -10px;
+}
+/* .output {
+    align-items: center;
+} */
+.dataframe { /* dataframe atau table */
+    background: #faf5ef;
+    box-shadow: 0px 1px 2px #bbb;
+}
+.dataframe thead th, .dataframe tbody td {
+    text-align: center;
+    padding: 1em;
+}
+div#notebook p, div#notebook{
+    font-size: 115%;
+    line-height: 110%;
+}
+.rendered_html pre, .rendered_html table{
+    font-size: 115%;
+    line-height: 110%;
+}
+.CodeMirror, .CodeMirror pre, .CodeMirror-dialog, .CodeMirror-dialog .CodeMirror-search-field {
+    font-size: 120%;
+    line-height: 125%;
+}
+
+.terminal-app .terminal {
+    font-size: 120%;
+    line-height: 125%;
+}
+
+
+body {
+    background-color: #f7efdc !important;
+}
+.rendered_html pre code {
+    background: #f4f4f4;
+    border: 1px solid #ddd;
+    border-left: 3px solid #2a7bbd;
+    color: #444;
+    page-break-inside: avoid;
+    font-family: monospace;
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 1.6em;
+    max-width: 100%;
+    overflow: auto;
+    padding: 1em 1.5em;
+    display: block;
+    word-wrap: break-word;
+}
+.rendered_html pre {
+    background-color:#FAF5EF;
+}
+#texteditor-backdrop {
+    background-color: #F7EFDC;
+}
+.CodeMirror {
+    background-color: #f2f2f2 !important;
+    font-size: 18px;
+}
+span.save_widget span.filename, .navbar-default .navbar-text {
+    color: #F7F4EB;
+}
+.dropdown-menu:nth-child(n) > li > a:hover {
+    background-color: #FFC760;
+}
+.btn.btn-primary {
+    background-color: #5c4d23;
+}
+.nav-pills > li.active > a, .nav-pills > li.active > a:focus {
+    background-color: #5c4d23;
+}
+.nav-tabs > li > a, .item_name {
+    color: #332109;
+}
+.nav-tabs > li > a:hover {
+    background-color: #332109;
+    color: #F6ECD5;
+}
+
+#kernel_logo_widget .current_kernel_logo {
+    border-radius: 5px;
+    box-shadow: 0px 0px 0px 3px #f7efdc;
+}
+
+.xterm-cursor-layer {
+    margin-top: 0px;
+}
+
+.xterm .xterm-screen {
+    margin-top: 10px;
+}
+
+#menubar-container, #nbTranslate_toolbar {
+    background-color: #FAF5EF;
+}
+
+span.last_modified {
+    color: white;
+}

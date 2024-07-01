@@ -1,0 +1,45 @@
+#!/bin/bash
+
+if [ "$1" == "auth" ]; then
+    godrive-auth
+    exit 0
+fi
+
+if [ "$1" == "mount" ]; then
+    godrive-mount
+    exit 0
+fi
+
+if [ "$1" == "umount" ]; then
+    godrive-umount
+    exit 0
+fi
+
+##
+# Color  Variables
+##
+green='\e[32m'
+clear='\e[0m'
+
+##
+# Color Functions
+##
+
+ColorGreen(){
+        echo -ne $green$1$clear
+}
+
+
+echo "Usage:"
+echo ""
+echo "To authorize your Google Drive to be mounted:"
+echo "$(ColorGreen 'godrive auth')"
+echo ""
+echo "To mount your Google Drive:"
+echo "$(ColorGreen 'godrive mount')"
+echo ""
+echo "To unmount your Google Drive:"
+echo "$(ColorGreen 'godrive umount')"
+echo ""
+
+exit 0

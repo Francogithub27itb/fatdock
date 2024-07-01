@@ -1,0 +1,1 @@
+export COURSE_NAME=m31

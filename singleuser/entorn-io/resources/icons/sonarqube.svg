@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="410" height="410" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+ <defs>
+  <style>.cls-1,.cls-2{fill:#1b171b;}.cls-2{fill-rule:evenodd;}.cls-3{fill:#4e9bcd;}</style>
+ </defs>
+ <title>SonarQube</title>
+ <g>
+  <title>Layer 1</title>
+  <g id="SonarQube_Black">
+   <path fill="black" id="svg_10" d="m358.64,396.45l-22,0c0,-177.18 -146.21,-321.34 -325.91,-321.34l0,-22c191.83,0 347.91,154.02 347.91,343.34z" class="cls-3"/>
+   <path id="svg_11" d="m373.86,278.3c-26.43,-111.17 -116.49,-204 -229.42,-236.38l5,-17.63c119.2,34.22 214.28,132.25 242.21,249.77l-17.79,4.24z" class="cls-3"/>
+   <path id="svg_12" d="m390.78,174c-27.22,-59.35 -73.59,-111.11 -130.57,-145.73l7.62,-12.54c59.46,36.13 107.86,90.16 136.29,152.15l-13.34,6.12z" class="cls-3"/>
+  </g>
+ </g>
+</svg>

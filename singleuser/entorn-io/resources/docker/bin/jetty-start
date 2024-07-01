@@ -1,0 +1,10 @@
+#!/bin/sh
+
+export net=entornet
+export tcport=$1
+export DOCKER_HOST=tcp://127.0.0.1:2375
+docker network create $net > /dev/null  2>&1
+jetty-stop > /dev/null 2>&1
+docker volume rm webapps > /dev/null 2>&1
+cd /home/$NB_USER/.docker/jetty
+/usr/local/bin/docker-compose up -d --remove-orphans

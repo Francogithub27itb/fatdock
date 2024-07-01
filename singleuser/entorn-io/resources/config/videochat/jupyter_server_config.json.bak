@@ -1,0 +1,28 @@
+{
+  "VideoChat": {
+    "room_prefix": "ilg",
+    "rooms": [
+      {
+        "id": "1T",
+        "displayName": "1T",
+        "description": "Primer curs de DAW"
+      },
+      {
+        "id": "2T",
+        "displayName": "2T",
+        "description": "Segon curs de DAW"
+      },
+      {
+        "id": "1V",
+        "displayName": "1V",
+        "description": "Primer curs d'ASIX"			  
+      },
+      {
+        "id": "2V",
+        "displayName": "2V",
+        "description": "Segon curs d'ASIX"
+      }
+    ],
+    "jitsi_server": "meet.jit.si"
+  }
+}

@@ -1,0 +1,46 @@
+#!/bin/bash
+
+if [ "$1" == "start" ]; then
+    mg-start
+    exit 0
+fi
+
+if [ "$1" == "stop" ]; then
+    mg-stop
+    exit 0
+fi
+
+if [ "$1" == "status" ]; then
+    mg-status
+    exit 0
+fi
+
+
+
+
+##
+# Color  Variables
+##
+green='\e[32m'
+clear='\e[0m'
+
+##
+# Color Functions
+##
+
+ColorGreen(){
+        echo -ne $green$1$clear
+}
+
+echo "Usage:"
+echo ""
+echo "To start the MONGODB docker container:"
+echo "$(ColorGreen 'mg start') or $(ColorGreen 'mongod start') "
+echo ""
+echo "To stop the MONGODB docker container:"
+echo "$(ColorGreen 'mg stop') or $(ColorGreen 'mongod stop') "
+echo ""
+echo "To check the status of the MONGODB docker container:"
+echo "$(ColorGreen 'mg status') or $(ColorGreen 'mongod status') "
+echo ""
+

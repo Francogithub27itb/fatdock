@@ -1,0 +1,31 @@
+#!/bin/bash
+
+USAGE="Usage : backup_dir name_of_directory_to_backup"
+
+#Prompts when there are no arguments passed
+if [ "$#" -le 0 ]; then
+    echo $USAGE
+    exit 2
+fi
+
+dir=$1
+
+dir_name=`echo "$dir" | tr / _`
+
+timestamp=`date +%F-%T | sed "s/:/-/g"`
+
+echo
+echo "Starting backup of directory $dir ..."
+echo 
+
+cd /tmp
+sudo zip -rqy backup_${dir_name}_$NB_USER_$timestamp.zip $dir -x "*/.*" 2>/dev/null
+sudo mv backup_${dir_name}_$NB_USER_$timestamp.zip $HOME
+sudo chown $NB_USER:$NB_GID $HOME/backup_${dir_name}_$NB_USER_$timestamp.zip
+cd $HOME
+
+echo "Backup successful !"
+echo
+exit 0
+
+

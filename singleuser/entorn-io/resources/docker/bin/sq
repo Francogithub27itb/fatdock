@@ -1,0 +1,43 @@
+#!/bin/bash
+
+if [ "$1" == "start" ]; then
+    sq-start
+    exit 0
+fi
+
+if [ "$1" == "stop" ]; then
+    sq-stop
+    exit 0
+fi
+
+if [ "$1" == "status" ]; then
+    sq-status
+    exit 0
+fi
+
+##
+# Color  Variables
+##
+green='\e[32m'
+clear='\e[0m'
+
+##
+# Color Functions
+##
+
+ColorGreen(){
+        echo -ne $green$1$clear
+}
+
+
+echo "Usage:"
+echo ""
+echo "To start the SONARQUBE docker containers:"
+echo "$(ColorGreen 'sq start')"
+echo ""
+echo "To stop the SONARQUBE docker containers:"
+echo "$(ColorGreen 'sq stop')"
+echo ""
+echo "To check the status of the SONARQUBE and related docker container:"
+echo "$(ColorGreen 'sq status')"
+echo ""

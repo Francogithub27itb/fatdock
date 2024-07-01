@@ -1,0 +1,18 @@
+void print(Object o){ System.out.print(o.toString());}
+void println(Object o){ System.out.println(o.toString());}
+void printf(String format, Object... args){ System.out.printf(format,args);}
+String printBinary(String binary, int blockSize, String separator) {
+        List<String> result = new ArrayList<>();
+        int index = 0;
+        while (index < binary.length()) {
+            result.add(binary.substring(index, Math.min(index + blockSize, binary.length())));
+            index += blockSize;
+        }
+
+        return result.stream().collect(java.util.stream.Collectors.joining(separator));
+    }
+void intToBin(int input){
+    String result = Integer.toBinaryString(input);
+    String resultWithPadding = String.format("%32s", result).replaceAll(" ", "0");
+    System.out.println(printBinary(resultWithPadding, 4, " ")); 
+}

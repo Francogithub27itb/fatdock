@@ -1,0 +1,46 @@
+#!/bin/bash
+
+sudo sysctl -w vm.max_map_count=524288
+sudo sysctl -w fs.file-max=131072
+ulimit -n 131072
+ulimit -u 8192
+
+export net=entornet
+export pgport=$1
+export DOCKER_HOST=tcp://127.0.0.1:2375
+docker network create $net > /dev/null  2>&1
+sq-stop > /dev/null 2>&1
+cd /home/$NB_USER/.docker/sonarqube
+/usr/local/bin/docker-compose up -d --remove-orphans
+dbdata_mount > /dev/null 2>&1
+
+error=
+up=
+check_status(){
+  sleep $1
+  up=`docker logs sonarqube_container | grep enabled | grep 9090`
+  error=`docker logs sonarqube_container | grep -i "Exception"`
+}
+
+while [ "$up" == "" ]
+do
+   echo "Checking ..."
+   check_status 3
+done
+
+if [ "$error" != "" ]; then 
+	echo "Error detected. Trying to fix it ..."
+	if ! /home/$NB_USER/.local/bin/sonar-psql ; then
+		echo "Error: postgres server is not running or psql client not installed"
+		sq-stop
+		exit 1
+	fi
+	sq-stop
+	sq-start
+else
+	echo "Sonarqube is up and running now."
+	echo
+fi
+
+exit 0
+

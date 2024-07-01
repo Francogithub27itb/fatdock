@@ -1,0 +1,10 @@
+#!/bin/bash
+
+a='eval "$(command conda'
+str=`grep "$a" ~/.bashrc`
+if [[ $str =~ ^e.* ]]; then
+        sed -i 's/eval "$(command conda/#eval "$(command conda/g' ~/.bashrc
+        echo "Conda desactivat en nous terminals."
+        echo "Conda is deactivated in new terminals."
+fi
+

@@ -1,0 +1,43 @@
+#!/bin/bash
+
+if [ "$1" == "start" ]; then
+    pg-start
+    exit 0
+fi
+
+if [ "$1" == "stop" ]; then
+    pg-stop
+    exit 0
+fi
+
+if [ "$1" == "status" ]; then
+    pg-status
+    exit 0
+fi
+
+##
+# Color  Variables
+##
+green='\e[32m'
+clear='\e[0m'
+
+##
+# Color Functions
+##
+
+ColorGreen(){
+        echo -ne $green$1$clear
+}
+
+
+echo "Usage:"
+echo ""
+echo "To start the POSTGRES docker container:"
+echo "$(ColorGreen 'pg start')"
+echo ""
+echo "To stop the POSTGRES docker container:"
+echo "$(ColorGreen 'pg stop')"
+echo ""
+echo "To check the status of the POSTGRES docker container:"
+echo "$(ColorGreen 'pg status')"
+echo ""

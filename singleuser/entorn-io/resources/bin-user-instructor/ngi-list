@@ -1,0 +1,107 @@
+#!/opt/conda/bin/python3
+# -*- coding: utf-8 -*-
+import requests
+import os
+import sys
+from urllib.parse import quote
+
+# https://www.geeksforgeeks.org/print-colors-python-terminal/
+def prRed(skk, exit=True):
+    print('\033[91m {}\033[00m'.format(skk))
+
+    if exit:
+        sys.exit(-1)
+
+def prGreen(skk):
+    print('\033[92m {}\033[00m'.format(skk))
+
+def check_status_code(response):
+    if response.status_code != requests.codes.ok:
+        prRed(
+            'ngshare returned an invalid status code {}'.format(
+                response.status_code
+            ),
+            False,
+        )
+        if response.status_code >= 500:
+            prRed(
+                'ngshare encountered an error. Please contact the maintainers'
+            )
+
+        check_message(response)
+
+def check_message(response):
+
+    response = response.json()
+    if not response['success']:
+        prRed(response['message'])
+
+    return response
+
+def get_username():
+    if 'JUPYTERHUB_USER' in os.environ:
+        return os.environ['JUPYTERHUB_USER']
+    else:
+        return os.environ['USER']
+
+def ngshare_url():
+    global _ngshare_url
+    try:
+        return _ngshare_url
+    except NameError:
+        try:
+            from nbgrader.apps import NbGrader
+
+            nbgrader = NbGrader()
+            nbgrader.load_config_file()
+            exchange = nbgrader.config.ExchangeFactory.exchange()
+            _ngshare_url = exchange.ngshare_url
+            return _ngshare_url
+        except Exception as e:
+            prRed(
+                'Cannot determine ngshare URL. Please check your nbgrader_config.py!',
+                False,
+            )
+            prRed(e)
+
+def get_header():
+    if 'JUPYTERHUB_API_TOKEN' in os.environ:
+        return {'Authorization': 'token ' + os.environ['JUPYTERHUB_API_TOKEN']}
+    else:
+        return None
+
+def encode_url(url):
+    return quote(url, safe='/', encoding=None, errors=None)
+
+def get(url, data):
+    header = get_header()
+    encoded_url = encode_url(url)
+
+    try:
+        response = requests.get(
+            ngshare_url() + encoded_url, data=data, headers=header
+        )
+        response.raise_for_status()
+    except requests.exceptions.ConnectionError:
+        prRed('Could not establish connection to ngshare server')
+    except Exception:
+        check_status_code(response)
+
+    return check_message(response)
+
+def list_instructors(course_id):
+    url = f'/instructors/{course_id}'
+    data = {'user': get_username()}
+    response = get(url, data)
+    print(f'Instructors for the course {course_id}:')
+    for instructor in response['instructors']:
+        print(instructor)
+    prGreen(
+        'Successfully listed all instructors'
+    )
+
+if len(sys.argv) > 1:
+    list_instructors(sys.argv[1])
+else:
+    list_instructors(os.environ['COURSE_NAME'])
+    prRed("Course name not provided. Listing instructors from current course.")

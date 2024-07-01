@@ -1,0 +1,111 @@
+#!/bin/bash
+
+file="$HOME/.docker/idea/.env"
+
+intro_msg="---- Script to set or change the TAG for the Jetbrains IDEA docker image ----"
+
+echo $intro_msg
+
+##
+# Color  Variables
+##
+green='\e[32m'
+blue='\e[34m'
+red='\e[31m'
+clear='\e[0m'
+
+##
+# Color Functions
+##
+
+ColorGreen(){
+        echo -ne $green$1$clear
+}
+ColorBlue(){
+        echo -ne $blue$1$clear
+}
+
+ColorRed(){
+        echo -ne $red$1$clear
+}
+
+### Show the current IDEA docker image
+echo ""
+echo "The docker image for Idea is currently set to:"
+image=$(cat $file | grep IDEA_IMG | cut -d "=" -f 2)
+echo $(ColorBlue "$image")
+echo ""
+echo "The current tag is:"
+IDEA_TAG=$(echo $image | cut -d"/" -f2 | cut -d":" -f2)
+echo "$(ColorBlue $IDEA_TAG)"
+
+## get IDEA_INAME
+IDEA_INAME=$(echo $image | cut -d"/" -f2 | cut -d":" -f1)
+
+### Print instructions if IDEA container is running
+idea_container_name="idea_container_$IDEA_INAME"
+
+if [ "$(docker ps -a | grep $idea_container_name)" ]; then
+        echo ""
+        echo "$(ColorRed 'Attention: the TAG for the Idea docker image cannot be changed now')"
+        echo "(Read instructions below)"
+        echo ""  
+        echo "$(ColorRed 'Idea docker is running...') It is mandatory to stop $(ColorBlue "$idea_container_name") before changing the tag for the Idea image:"
+        echo "$(ColorGreen 'idea stop')"
+        echo ""
+        echo "After changing the tag for the Idea image, start again the Idea container using:"
+        echo "$(ColorGreen 'idea start')"
+        echo "--"
+        echo ""
+        echo ""
+        exit 0
+fi
+
+#######################################
+
+function change-tag(){
+    sed -i "s/$IDEA_TAG/$1/g" $file
+    echo "Idea tag changed to $1"
+    echo ""
+}
+
+function instructions(){
+### Instructions on how to change the IDEA_TAG
+echo ""
+echo "To change the default tag run:"
+echo "$(ColorGreen  'idea set-tag <your-tag-here>')"
+echo "For example:"
+echo "$(ColorGreen 'idea set-tag 2022.1-projector-v1.8.0')"
+echo ""
+echo "($(ColorGreen 'idea set-tag') can be shortened as $(ColorGreen 'idea sett'))"
+echo ""
+exit 0
+}
+
+function find-tags(){
+echo ""
+echo "You can check out all available tags in"
+echo "$(ColorRed "https://hub.docker.com/r/jetbrains/${IDEA_INAME}/tags")"
+echo ""
+}
+
+if [ -z "$1" ]; then
+        find-tags
+        instructions
+fi
+
+while true; do
+        find-tags
+        read -p "Please confirm you want to change your current tag to $(ColorBlue $1) (y/n): " yn
+    case $yn in
+        [Yy]* ) change-tag $1; break;;
+        [Nn]* ) echo "Nothing changed"; exit;;
+        * ) echo "Please answer Y (yes) or N (no).";;
+    esac
+done
+
+
+
+
+
+
