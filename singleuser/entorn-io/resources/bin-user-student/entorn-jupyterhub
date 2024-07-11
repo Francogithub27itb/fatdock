@@ -55,7 +55,7 @@ fi
 
 echo "Opening Entorn in $browser ..."
 
-$browser https://$proxied_domain/user/$USER/lab --password-store=basic > /dev/null 2>&1 &
+$browser https://$proxied_domain/hub/home --password-store=basic > /dev/null 2>&1 &
 
 echo
 echo "If required:"

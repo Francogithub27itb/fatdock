@@ -299,7 +299,7 @@ chmod 600 $vnc_config_user_dir/passwd
 chown $NB_USER:$NB_GID -R /opt/conda/share/gdb/auto-load
 
 # start vnc server :2
-su $NB_USER -c "/usr/local/bin/vncserver :2"
+su $NB_USER -c "/usr/bin/vncserver :2"
 
 # start sshd service
 service ssh start

@@ -2,7 +2,8 @@
 
 
 squash_base_image() {
-   base_image=jupyter/all-spark-notebook
+   #base_image=jupyter/all-spark-notebook
+   base_image=jupyter/minimal-notebook
    docker build --squash -t entorn/base:squashed -f Dockerfile.squash \
                 --build-arg BASE_CONTAINER=$base_image \
 	        .

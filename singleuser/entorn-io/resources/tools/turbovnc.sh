@@ -3,18 +3,16 @@
 # Stops script execution if a command has an error
 set -e
 
-echo "Installing turbovnc ..."
 echo ""
-
-wget -q "https://sourceforge.net/projects/turbovnc/files/${TURBOVNC_VERSION}/turbovnc_${TURBOVNC_VERSION}_amd64.deb/download" -O turbovnc_${TURBOVNC_VERSION}_amd64.deb 
-
-apt-get install -y -q ./turbovnc_${TURBOVNC_VERSION}_amd64.deb 
+echo "Installing TurboVNC"
+# Install instructions from https://turbovnc.org/Downloads/YUM
+wget -q -O- https://packagecloud.io/dcommander/turbovnc/gpgkey | \
+        gpg --dearmor >/etc/apt/trusted.gpg.d/TurboVNC.gpg; 
+wget -O /etc/apt/sources.list.d/TurboVNC.list https://raw.githubusercontent.com/TurboVNC/repo/main/TurboVNC.list
+apt-get -y -qq update
+apt-get -y -qq install turbovnc
 
 apt-get remove -y -q light-locker
-
-rm ./turbovnc_${TURBOVNC_VERSION}_amd64.deb
-
-ln -s /opt/TurboVNC/bin/* /usr/local/bin/ 
 
 apt update && apt install -y at-spi
 

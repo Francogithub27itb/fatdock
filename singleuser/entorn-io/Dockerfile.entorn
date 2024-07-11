@@ -4,7 +4,6 @@ FROM $BASE_CONTAINER
 ARG DATA_SCIENCE
 ARG DEVOPS
 
-#ARG ijava_version
 ARG java_version
 ARG java_provider
 ARG python_major_version
@@ -40,6 +39,7 @@ ARG JENKINS
 ARG MODELIO
 ARG PORTAINER
 ARG TURBOVNC
+ARG TIGERVNC
 ARG SPICE
 ARG JUPYTERBOOK
 ARG NBGRADER
@@ -51,20 +51,6 @@ ARG SONARQUBE
 USER $NB_USER
 
 ARG ijava_version=1.3.0
-#ARG java_version=17.0.4
-#ARG java_provider=oracle
-#ARG python_major_version=3.10
-
-
-#ARG SCALA3_VER=3.1.2
-#ARG AMMONITE_VER=2.5.4
-#ARG NPM_VER=6.14.4
-#ARG DOCKER_VERSION=20.10.17
-#ARG DOCKER_COMPOSE_VERSION=2.6.1
-#ARG MONGO_VER=5
-#ARG MODELIO_VER=4.1
-#ARG TURBOVNC_VERSION=3.0
-
 
 ENV \
     IJAVA_VERSION=$ijava_version \
@@ -106,8 +92,10 @@ RUN \
     mkdir -p $RESOURCES_PATH && chmod a+rwx $RESOURCES_PATH && \
     mkdir -p $WORKSPACE_HOME && chmod a+rwx $WORKSPACE_HOME && \
     mkdir -p $SSL_RESOURCES_PATH && chmod a+rwx $SSL_RESOURCES_PATH && \
-    mamba install conda-build -y \
-    && clean-layer.sh
+    clean-layer.sh
+#    mamba install conda-build -y \
+#    && clean-layer.sh
+
 RUN apt-get update && \
     apt-get install -y locales && \
     echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
@@ -222,7 +210,7 @@ clean-layer.sh
 
 ENV LD_LIBRARY_PATH=/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:$CONDA_ROOT/lib
 
-# Install xfce4 & gui tools (firefox and chrome included)
+# Install xfce4 & gui tools (chrome included)
 COPY resources/scripts/install-gui.sh resources/scripts/install-brave.sh /usr/bin/
 RUN \
     chmod a+rwx /usr/bin/install-gui.sh && \
@@ -240,12 +228,13 @@ RUN \
 ### TOOLS START ####
 
 ## VNC 
-# Remove light-locker to prevent screen lock
-#ARG TURBOVNC=true
-#ARG TURBOVNC_VERSION=3.0
-COPY resources/tools/turbovnc.sh $RESOURCES_PATH/tools/turbovnc.sh
+COPY resources/tools/t*vnc.sh $RESOURCES_PATH/tools/
 ENV TURBOVNC_VERSION=${TURBOVNC_VERSION}
 RUN \
+    if [ "$TIGERVNC" == "true" ]; then \
+        chmod +x $RESOURCES_PATH/tools/tigervnc.sh ;\
+        /bin/bash $RESOURCES_PATH/tools/tigervnc.sh ;\
+    fi && \
     if [ "$TURBOVNC" == "true" ]; then \
         chmod +x $RESOURCES_PATH/tools/turbovnc.sh ;\
         /bin/bash $RESOURCES_PATH/tools/turbovnc.sh ;\
@@ -349,17 +338,6 @@ RUN \
 
 ## scala almond end ##
 
-## Ansible kernel is not working ...
-#USER root
-#COPY  resources/ikernels/ansible/kernel.py $RESOURCES_PATH/ikernels/ansible/kernel.py
-#RUN \
-    #ansible start
-    #if [[ "$ANSIBLE_KERNEL" == "true" ]]; then \
-    #    /opt/conda/bin/mamba install -n base --yes -c conda-forge ansible ansible-runner ansible-lint ansible-kernel ; \
-    #cp -f /resources/ikernels/ansible/kernel.py /opt/conda/lib/python3.11/site-packages/ansible_kernel/kernel.py ; \
-    #fi && \
-    #clean-layer.sh
-
 ## Ansible install but no ansible-kernel
 RUN \
     #ansible start
@@ -384,26 +362,10 @@ RUN \
 
 ### IDEs END ###
 
-## For all docker based apps:
-#COPY resources/docker $RESOURCES_PATH/docker/
-
 #### DBs ####
 # /resources/dbs and /resources/docker
 COPY resources/dbs $RESOURCES_PATH/dbs
 COPY resources/docker $RESOURCES_PATH/docker
-
-#### POSTGRES and pgadmin START
-#ARG PG=true
-#COPY resources/dbs/postgres $RESOURCES_PATH/dbs/postgres/
-
-#### MYSQL START
-#ARG MYSQL=true
-#COPY resources/dbs/mysql/ $RESOURCES_PATH/dbs/mysql/
-
-#### Mongodb START
-#ARG MONGO=true
-#ARG MONGO_VER=5
-#COPY resources/dbs/mongodb/ $RESOURCES_PATH/dbs/mongodb/
 
 RUN \
     if [ "$PG" == "true" ]; then \
@@ -434,23 +396,13 @@ RUN \
 COPY resources/apps/ $RESOURCES_PATH/apps/
 
 ## Jetty 10 Start
-#ARG JETTY=true
 COPY resources/examples/jsp-servlet/examples.tar.gz $RESOURCES_PATH/examples/jsp-servlet/examples.tar.gz
 
-## Jenkins Start
-#ARG JENKINS=true
-
 ### Dependencies for Modelio
-#ARG MODELIO=true
-#ARG MODELIO_VER=4.1
 ENV MODELIO_VER=${MODELIO_VER}
 COPY ./resources/config/modelio.config $RESOURCES_PATH/config/
 
-## Portainer start
-# COPY ./resources/apps/portainer/portainer-install.sh $RESOURCES_PATH/apps/portainer/
-
 ## SonarQube start
-#COPY resources/apps/sonarqube $RESOURCES_PATH/apps/sonarqube/
 COPY resources/config/sonar.properties $RESOURCES_PATH/config/
 
 ### install-gcloud-cli
@@ -500,22 +452,10 @@ RUN \
 
 ## Jupyter remote Desktop proxy
 
-ADD jupyter-remote-desktop-proxy/ /opt/install
-RUN fix-permissions.sh /opt/install && \
-    chmod +x /opt/install/set_exec.sh && \
-    cd /opt/install && \
-    /bin/bash /opt/install/set_exec.sh && \
-    clean-layer.sh
+RUN pip install jupyter-remote-desktop-proxy && \
+jupyter server extension enable jupyter_remote_desktop_proxy && \
+mamba install -c conda-forge websockify -y	
 
-USER $NB_USER
-
-RUN cd /opt/install && \
-   mamba env update -n base --file environment.yml && \
-   ln -s /opt/install/jupyter_desktop/share /opt/conda/lib/python${PYTHON_VERSION_MAJOR}/site-packages/jupyter_desktop/ && \
-   clean-layer.sh
-
-
-USER root
 
 ## jupyterbook
 
@@ -524,9 +464,8 @@ RUN \
     mamba install -c conda-forge --yes jupyter-book streamlit ; \
     pip install jupyterquiz jupytercards ; \
     #pip install git+https://github.com/wjbmattingly/quiz-generator.git; \
-    pip uninstall --yes "docutils==0.19"; \
     pip uninstall --yes docutils ; \
-    pip install "docutils==0.17.1" ;\
+    pip install "docutils==0.20" ;\
   fi \
     && clean-layer.sh
 #
@@ -606,16 +545,9 @@ RUN \
 
 
 
-
-
-
 ### REBUMPS START ###
 
-## sshfs and ansible remake
-#RUN \
-#    if [[ "$ANSIBLE_KERNEL" == "true" ]]; then \
-#        /opt/conda/bin/mamba install -n base --yes -c conda-forge ansible ansible-runner ansible-lint ansible-kernel ; \        
-#    fi && \
+## sshfs 
 RUN apt update && apt install -y sshfs && \
     sed -i "s/#PermitUserEnvironment no/PermitUserEnvironment yes/g" /etc/ssh/sshd_config && \
     sed -i "s/#PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config && \
@@ -661,7 +593,6 @@ RUN \
 ### CONFIGURATIONS START ###
 
 COPY ./resources $RESOURCES_PATH/
-#COPY ./resources/config/user $RESOURCES_PATH/config/
 
 ## Adding nbTranslate config
 # nbTranslate default configuration to catalan
@@ -679,7 +610,7 @@ RUN \
     chmod +x $RESOURCES_PATH/scripts/*.sh && \
     chmod +x /usr/bin/*.sh && \
     /usr/bin/jpy-customize.sh && \
-    /usr/bin/terminal-customize.sh && \
+#/usr/bin/terminal-customize.sh && \
 # Directory for apps installed by user && \
  mkdir -p /opt/apps && \
  chown $NB_USER:$NB_GID /opt/apps && \
@@ -692,11 +623,6 @@ COPY ./resources/icons/* /etc/jupyter/icons/
 
 # Classic notebook customization
 # COPY resources/config/custom.css $RESOURCES_PATH/config/
-
-
-# jupyterlab customization
-# [next is needed by resources/scripts/set-lab-themes.sh]
-# COPY resources/config/jupyterlab-custom $RESOURCES_PATH/config/jupyterlab-custom
 
 
 ## Jupyter Server Proxy config:
@@ -768,7 +694,6 @@ make_exec /usr/local/bin/before-notebook.d'
 
 ### CONFIGURATIONS END ###
 
-
 ENV \
     IDEA=$IDEA \
     PG=$PG \
@@ -783,6 +708,20 @@ ENV \
 
 # COPY ./resources/sampledb $RESOURCES_PATH/sampledb
 # COPY ./resources/config/xfce4 $RESOURCES_PATH/config/xfce4/
+
 COPY ./resources/images/mountains.jpg /usr/share/backgrounds/xfce/xfce-verticals.png
+
 COPY ./resources/apps/brave-browser/brave-browser.desktop /usr/share/applications/brave-browser.desktop 
+
 COPY ./resources/apps/google-chrome/google-chrome.desktop /usr/share/applications/google-chrome.desktop
+
+COPY ./resources/jupyter-remote-desktop/setup_websockify.py  /opt/conda/lib/python3.11/site-packages/jupyter_remote_desktop_proxy/setup_websockify.py
+
+COPY ./resources/jupyter-remote-desktop/index.css  /opt/conda/lib/python3.11/site-packages/jupyter_remote_desktop_proxy/static/dist/index.css
+
+#RUN mamba install -c conda-forge jupyterlab==4.2.3 -y
+RUN fix-permissions.sh $CONDA_BASE_PATH
+
+RUN \
+pip install langchain_anthropic langchain_openai langchain_cohere langchain_google_genai langchain_mistralai langchain_nvidia_ai_endpoints && \
+clean-layer.sh

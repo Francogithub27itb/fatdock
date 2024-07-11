@@ -25,14 +25,20 @@ mamba install -c conda-forge -y \
     yapf \
     jupyterlab_iframe \
     jupyterlab-latex \
-    jupyterlab-unfold \
     jupyterlab-fasta
+    #jupyterlab-unfold 
     #voila
 #    jupyter_server=2.3.0 
 
 pip install jupyterlab-hide-code
-pip install jupyter_ai
-pip install jupyterlab-code-formatter
+
+pip install jupyter_ai 
+
+#langchain_anthropic langchain_openai langchain_cohere langchain_google_genai langchain_mistralai langchain_nvidia_ai_endpoints
+
+#pip install jupyter_ai langchain_anthropic langchain_openai langchain_cohere langchain_google_genai langchain_mistralai langchain_nvidia_ai_endpoints
+
+#pip install jupyterlab-code-formatter #outdated
 
 #mamba install rise --no-deps -y
 
@@ -45,5 +51,20 @@ pip install jupyterlab-code-formatter
 #pip install jupyter-launcher-shortcuts
 #jupyter serverextension enable voila
 #jupyter server extension enable voila 
+
+
+mamba install -c conda-forge python-lsp-server r-languageserver -y
+
+npm install --save-dev bash-language-server \
+dockerfile-language-server-nodejs \
+typescript-language-server \
+sql-language-server \
+vscode-css-languageserver-bin \
+vscode-html-languageserver-bin \
+vscode-json-languageserver-bin \
+yaml-language-server
+
+mamba install --channel conda-forge tectonic texlab chktex -y
+
 
 exit 0

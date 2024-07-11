@@ -7,7 +7,8 @@ devops=false
 dev=false
 
 squash_base_image() {
-   base_image=jupyter/all-spark-notebook
+   #base_image=jupyter/all-spark-notebook
+   base_image=jupyter/minimal-notebook
    docker build --squash -t entorn-io/data-base:squashed -f Dockerfile.squash \
 	   --build-arg BASE_CONTAINER=$base_image \
            .
@@ -149,7 +150,8 @@ elif [[ "$1" == "full" ]]; then
     mysql=true
     mongo=true
     modelio=true
-    turbovnc=true
+    turbovnc=false
+    tigervnc=true
     spice=false
     jupyterbook=true
     # proxy server:
@@ -378,6 +380,7 @@ docker build -t entorn-io/singleuser-$1:$tag -f Dockerfile.entorn \
 	--build-arg HEROKU=$heroku \
 	--build-arg SONARQUBE=$sonarqube \
         --build-arg TURBOVNC=$turbovnc \
+        --build-arg TIGERVNC=$tigervnc \
         --build-arg SPICE=$spice \
         --build-arg JUPYTERBOOK=$jupyterbook \
 	--build-arg GCP=$gpc \

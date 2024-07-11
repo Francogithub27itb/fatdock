@@ -9,7 +9,7 @@ mamba install -c conda-forge --yes \
   jupyter-server-proxy \
   jupyter_server \
   diff-match-patch \
-  jupyterlab-git==0.50.0
+  jupyterlab-git==0.50.1
 # jupyterlab-github \
 #  jupyter_nbextensions_configurator 
 #  jupyterlab-pullrequests 

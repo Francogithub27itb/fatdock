@@ -148,3 +148,6 @@ path=`echo $PATH | grep conda`
 if [ "$path" == "" ]; then
 	export PATH=$PATH:/opt/conda/bin:/opt/conda/condabin:/opt/node/bin:/resources/.pyenv/shims:/resources/.pyenv/bin:/usr/local/spark/bin:/opt/conda/share/npm-packages/bin
 fi
+
+alias mamba='mamba $1 2> /dev/null'
+alias conda='conda $1 2> /dev/null'
