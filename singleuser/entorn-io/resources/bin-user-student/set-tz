@@ -1,9 +1,0 @@
-#!/bin/sh
-
-sudo dpkg-reconfigure tzdata 2> /dev/null       
-
-date
-echo 
-
-exit 0
-

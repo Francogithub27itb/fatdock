@@ -1,9 +1,0 @@
-#!/bin/sh
-
-export net=host
-export ideaport=$1
-export DOCKER_HOST=tcp://127.0.0.1:2375
-idea-stop > /dev/null 2>&1
-docker volume rm idea_home > /dev/null 2>&1
-cd /home/$NB_USER/.docker/idea
-/usr/local/bin/docker-compose up -d --remove-orphans

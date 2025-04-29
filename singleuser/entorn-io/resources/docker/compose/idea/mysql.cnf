@@ -1,4 +1,0 @@
-[mysql]
-socket     = /var/run/mysqld/mysqld.sock
-[client]
-password   = admin
